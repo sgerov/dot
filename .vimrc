@@ -17,7 +17,7 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'scrooloose/nerdtree'
 
 " Multi cursor
-Plugin 'kristijanhusak/vim-multiple-cursors'
+Plugin 'terryma/vim-multiple-cursors'
 
 " Search in current file
 Plugin 'lokaltog/vim-easymotion'
@@ -39,6 +39,7 @@ Plugin 'pangloss/vim-javascript'
 Plugin 'elixir-lang/vim-elixir'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'slim-template/vim-slim'
+Plugin 'tomlion/vim-solidity'
 
 " Color Schemes
 Plugin 'morhetz/gruvbox'
@@ -50,19 +51,28 @@ Plugin 'chrisbra/Colorizer'
 " Ruby
 Plugin 'vim-ruby/vim-ruby'
 
+" Rails
+Plugin 'tpope/vim-rails'
+
 " Javascript
 Plugin 'maksimr/vim-jsbeautify'
 " React
 Plugin 'mxw/vim-jsx'
 
 " Surround
-Plugin 'surround.vim'
+Plugin 'tpope/vim-surround'
 
 " Tmux-vim splits
 Plugin 'christoomey/vim-tmux-navigator'
 
 " Commenting
 Plugin 'scrooloose/nerdcommenter'
+
+" Rspec
+Plugin 'thoughtbot/vim-rspec'
+
+" Send stuff to Tmux
+Plugin 'jgdavey/tslime.vim'
 
 call vundle#end()
 
@@ -137,8 +147,8 @@ let g:jsx_ext_required = 0
 autocmd VimEnter * set nosc
 
 " Quick ESC
-imap jj <ESC>
-imap hh <ESC>
+"imap jj <ESC>
+"imap hh <ESC>
 
 " Define leader
 let mapleader="\<Space>"
@@ -163,14 +173,17 @@ noremap   <Left>   <NOP>
 noremap   <Right>  <NOP>
 
 " Gif config
+
+let g:EasyMotion_do_mapping = 0 " Disable default mappings
 nmap <Leader>s <Plug>(easymotion-s2)
 
 " NERDTree
 nmap <leader>n :NERDTreeToggle<CR>
+nmap <leader>m :NERDTreeFind<CR>
 let NERDTreeHighlightCursorline=1
 
 " rubo cop
-let g:vimrubocop_config = '.rubocop.yml'
+"let g:vimrubocop_config = '.rubocop.yml'
 nmap <Leader>r :RuboCop<CR>
 nmap <Leader>ra :RuboCop -a<CR>
 
@@ -190,12 +203,18 @@ map <Leader>j :call JsBeautify()<CR>
 "
 " ale
 let g:ale_lint_on_text_changed = "always"
+"let g:ale_lint_on_insert_leave = 0
+"let g:ale_lint_on_save=1
 let g:ale_statusline_format = ['✗ %d ', '!%d ', '✓ ']
 let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-let g:ale_lint_delay = 1
-let g:ale_lint_on_insert_leave = 1
+let g:ale_lint_delay = 1500
+
+
+
+
+" let g:ale_lint_on_insert_leave = 0
 "ale status line
 set statusline+=%#warningmsg#
 set statusline+=\ %{ALEGetStatusLine()}
@@ -238,7 +257,7 @@ set splitright
 map <C-c> <leader>c<space>
 
 " yank to OS
-" set clipboard=unnamed
+set clipboard=unnamed
 
 " Move splits by mouse within tmux
 set mouse+=a
@@ -247,9 +266,46 @@ if &term =~ '^screen'
   set ttymouse=xterm2
 endif
 
+" RSpec.vim mappings
+map <Leader>tt :call RunCurrentSpecFile()<CR>
+map <Leader>ts :call RunNearestSpec()<CR>
+map <Leader>tl :call RunLastSpec()<CR>
+map <Leader>ta :call RunAllSpecs()<CR>
+map <Leader>tr :call RspecNoCommand()<CR>
+" Send to tmux
+let g:rspec_command = 'call Send_to_Tmux("ENV[\"GUARD_RSPEC_FOCUS\"] = \"{spec}\" \n
+      \ reset\nc \"{spec}\"\n")'
+
+function! RspecNoCommand()
+  call Send_to_Tmux("ENV[\"GUARD_RSPEC_FOCUS\"] = nil \n\ reset\nc \"{spec}\"\n")
+endfunction
+
+" Find the alternate file for the current path and open it
+nnoremap <leader>.. :A<cr>
+nnoremap <leader>.v :AV<cr>
+nnoremap <leader>.s :AS<cr>
+
+set ttyfast
+
+nnoremap <C-W>t :tabnew<cr>
+
+nnoremap p p=`]¬
+nnoremap P P=`]¬
+nmap <Leader><Leader> :nohl<CR>
+
+" Disable plugins when using mutiple cursors
+function! Multiple_cursors_before()
+	exe 'ALEDisable'
+endfunction
+
+function! Multiple_cursors_after()
+
+	exe 'ALEEnable'
+endfunction
+
 " TODO to get it running
 " Install vundle (To install all those plugins)
 " Install fzf
 " Install the_silver_searcher (For AG in FZF)
 " Install rubocop
-" Install JsBeautify
+" Install https://github.com/uptech/alt
